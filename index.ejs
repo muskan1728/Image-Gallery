@@ -1,0 +1,46 @@
+<%- include('../partials/header') %>
+
+<!-- here container will allign all items of page to center -->
+<div class="container">
+    <!-- header is just a container (forming a gray box) -->
+    <header class="jumbotron">
+        <div class="container">
+            <h1>Welcome to Image Gallery</h1>
+            <p>Here's goes our collection</p>
+            <p>
+                <a class="btn btn-primary btn-lg" href="/campgrounds/new">Add new Campground</a>
+            </p>
+        </div>
+    </header>
+    
+    <!-- here grid made flexible and it need less space -->
+    <div class="row text-center" style="display:flex; flex-wrap:wrap;">
+        <% campgrounds.forEach( function(campground){%>
+            <div class="col-md-3 col-sm-6">
+                <!-- in order to look like a grid a card -->
+                <div class='thumbnail'>
+                    <img src="<%= campground.image %>" >
+                    <div class="caption">
+                        <h4><%= campground.name %></h4>
+                    </div>
+                    <p>
+                        <a href="/campgrounds/<%= campground._id %>" class="btn btn-info">More info</a>
+                    </p>
+                </div>
+               
+             
+               
+            </div>
+    
+        <% })%>
+    
+
+    </div>
+
+   
+
+</div>
+
+
+
+<%- include('../partials/footer') %>
