@@ -9,6 +9,8 @@ const UserSchema = new Schema({
         unique:true
     }
 });
+// below line will add the field of username and password
+
 UserSchema.plugin(passportLocalMongoose);
 
 module.exports = mongoose.model('User',UserSchema)
