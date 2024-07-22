@@ -1,33 +1,42 @@
 var mongoose = require("mongoose");
-const Review = require('./review');
+const Review = require("./review");
 const Schema = mongoose.Schema;
 
+
+
+const ImagesSchema =  new Schema({
+  url: String, filename: String
+})
+// we will not store this thumbnail in db because it is derived from already store data
+ImagesSchema.virtual('thumbnail').get(function(){
+ return this.url.replace('/upload','/upload/w_200')
+})
 var CampgroundSchema = new Schema({
   title: String,
-  image: String,
+  images: [ImagesSchema],
   price: Number,
   description: String,
   location: String,
-  author:{
+  author: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: "User",
   },
-  reviews:[
+  reviews: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'Review'
-    }
-  ]
+      ref: "Review",
+    },
+  ],
 });
 
 // element deleted and passed to function
-CampgroundSchema.post('findOneAndDelete',async function(doc){
-  if(doc){
+CampgroundSchema.post("findOneAndDelete", async function (doc) {
+  if (doc) {
     await Review.deleteMany({
-      _id:{
-        $in: doc.reviews
-      }
-    })
+      _id: {
+        $in: doc.reviews,
+      },
+    });
   }
-})
-module.exports = mongoose.model('Campground',CampgroundSchema)
+});
+module.exports = mongoose.model("Campground", CampgroundSchema);

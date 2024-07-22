@@ -253,3 +253,24 @@
     -webkit-animation-fill-mode: forwards;
             animation-fill-mode: forwards;
   }
+
+  .custom-file-button {
+    input[type="file"] {
+      margin-left: -2px !important;
+  
+      &::-webkit-file-upload-button {
+        display: none;
+      }
+      &::file-selector-button {
+        display: none;
+      }
+    }
+  
+    &:hover {
+      label {
+        background-color: #dde0e3;
+        cursor: pointer;
+      }
+    }
+  }
+  
