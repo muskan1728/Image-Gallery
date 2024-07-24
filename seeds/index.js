@@ -35,6 +35,8 @@ const seedDB = async () => {
       // image: `https://images.unsplash.com/photo-1520824071669-892f70d8a23d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60`,
       description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga dolorum, saepe ratione deleniti aperiam harum voluptatum repellat at, provident eligendi fugiat vero doloremque perspiciatis libero sit natus. Qui, adipisci facere.",
       price: Math.floor(Math.random() * 20) + 10,
+      geometry: { type: 'Point', coordinates: [ 78.474522, 17.361362 ] },
+
     });
     await camp.save();
   }

@@ -9,6 +9,7 @@ const campgrounds = require('../controllers/campgrounds')
 var {isLoggedIn,validateCampground,isAuthor} = require('../middleware')
 var catchAsync= require("../utils/catchAsync");
 
+ // multer parse the images store it to cloudinary and it adds req.files contianing file details
 
 router.route('/')
 .get(catchAsync(campgrounds.index))
