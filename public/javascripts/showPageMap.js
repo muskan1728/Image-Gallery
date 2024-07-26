@@ -7,6 +7,8 @@ const map = new mapboxgl.Map({
   pitch: 60
 
 });
+map.addControl(new mapboxgl.NavigationControl());
+
     map.once('style.load', () => {
         map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
         map.setConfigProperty('basemap', 'showPlaceLabels', false);
