@@ -30,7 +30,6 @@ module.exports.createCampground= async (req, res) => {
     res.redirect(`/campgrounds/${campground._id}`)
 }
 
-
 module.exports.showCampground= async(req,res)=>{
     // to populate both campground and review author
     const campground = await Campground.findById(req.params.id)

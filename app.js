@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== "production") {
   require('dotenv').config();
 }
+
 var express = require("express");
   app = express(),
   bodyParser = require("body-parser"),
@@ -9,23 +10,18 @@ var express = require("express");
   ejsMate = require('ejs-mate'),
   session = require('express-session'),
   flash = require("connect-flash"),
-  ExpressError = require('./utils/ExpressError'),
   methodOverride = require("method-override"),
   passport = require("passport"),
   LocalStrategy = require("passport-local"),
-
+  helmet = require("helmet"),
+  ExpressError = require('./utils/ExpressError'),
   campgroundRoutes = require('./routes/campgrounds'),
   reviewRoutes = require('./routes/reviews');
   userRoutes = require('./routes/users');
-
   User       = require('./models/user')
-// seedDB     =require('./seeds')
-// Comment    =require('./models/comment')
+  const mongoSanitize = require('express-mongo-sanitize');
+const { contentSecurityPolicy } = require('helmet');
 
-//requiring routes
-// var commentRoutes = require('./routes/comments'),
-
-//     indexRoutes = require('./routes/index')
 
 mongoose.connect('mongodb://localhost:27017/yelp_camp_1', {useNewUrlParser: true,useCreateIndex:true, useUnifiedTopology: true ,useFindAndModify: false});
 const db = mongoose.connection;
@@ -34,33 +30,87 @@ db.once("open", () => {
     console.log("Database connected");
 });
 
-
+// registers the ejs-mate engine as the template engine for files with the .ejs extension.
 app.engine('ejs',ejsMate)
+// This line sets the default templating engine to EJS.
 app.set("view engine", "ejs");
+// Set the directory for view files
 app.set('views',path.join(__dirname,'views'))
-
+// Third-party Middleware: Parse incoming request bodies
 app.use(bodyParser.urlencoded({extended:true}))
+// methodOverride allows to use HTTP verbs such as PUT or DELETE in places where the client doesn't support it.
 app.use(methodOverride('_method'));
 // __dirname shows the path of current directory
+// Built-in Middleware: Serve static files
 app.use(express.static(path.join(__dirname,'public')))
+// remove or prohibit objects that begin wiht $ sign or contain . from req.body, req.qery,req.params
+app.use(mongoSanitize());
 
 const sessionConfig = {
+  name:'session',  // session cookie name, default: connect.sid
   secret:'thisshouldbeabettersecret',
   resave:false,
   saveUnitialized:true,
   cookie:{
     httpOnly: true,
+    // secure: true,
     expires:Date.now() + 1000 * 60 * 60 * 24 * 7, //1 week
     maxAge: 1000 * 60 * 60 * 24 * 7
   }
-
 }
 app.use(session(sessionConfig))
+//  helps manage flash messages, which are temporary messages that are typically used to provide feedback to users after a redirect
 app.use(flash());
+app.use(helmet())
+
+const scriptSrcUrls = [
+  "https://stackpath.bootstrapcdn.com/",
+  "https://api.tiles.mapbox.com/",
+  "https://api.mapbox.com/",
+  "https://kit.fontawesome.com/",
+  "https://cdnjs.cloudflare.com/",
+  "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+  "https://kit-free.fontawesome.com/",
+  "https://stackpath.bootstrapcdn.com/",
+  "https://api.mapbox.com/",
+  "https://api.tiles.mapbox.com/",
+  "https://fonts.googleapis.com/",
+  "https://use.fontawesome.com/",
+];
+const connectSrcUrls = [
+  "https://api.mapbox.com/",
+  "https://a.tiles.mapbox.com/",
+  "https://b.tiles.mapbox.com/",
+  "https://events.mapbox.com/",
+];
+const fontSrcUrls = [];
+app.use(
+  helmet.contentSecurityPolicy({
+      directives: {
+          defaultSrc: [],
+          connectSrc: ["'self'", ...connectSrcUrls],
+          scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+          styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+          workerSrc: ["'self'", "blob:"],
+          objectSrc: [],
+          imgSrc: [
+              "'self'",
+              "blob:",
+              "data:",
+              "https://res.cloudinary.com/dm4vhlkiq/", 
+              "https://images.unsplash.com/",
+          ],
+          fontSrc: ["'self'", ...fontSrcUrls],
+      },
+  })
+);
+
+// authentication middleware
 app.use(passport.initialize());
 app.use(passport.session())
 passport.use(new LocalStrategy(User.authenticate()));
-
 // how to store user in session
 passport.serializeUser(User.serializeUser());
 // how to get user out from session
@@ -99,11 +149,6 @@ app.get('/', (req, res) => {
   res.render('home')
 });
 
-
-// app.use('/campgrounds/:id/comments',commentRoutes);
-
-
-
 app.all("*",(req,res,next)=>{
     next(new ExpressError("Page Not FOund",404))
 })
@@ -111,7 +156,6 @@ app.use((err,req,res,next)=>{
     // console.error(err.stack);
     const { statusCode = 500} = err;
     if (!err.message) err.message = 'Something broke!'
-
     // res.status(statusCode).send(message);  // 500 status code means server error
     res.status(statusCode).render("error", { err });  // 500 status code means server error
 })

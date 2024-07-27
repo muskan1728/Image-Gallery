@@ -10,7 +10,11 @@
           class="carousel-item <%= i ===0 ? 'active':'' %>"
           data-bs-interval="2000"
         >
-          <img src="<%= img.url %>" class="d-block w-100" />
+          <img
+            crossorigin="anonymous"
+            src="<%= img.url %>"
+            class="d-block w-100"
+          />
         </div>
         <% })%>
       </div>
