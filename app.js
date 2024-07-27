@@ -9,6 +9,8 @@ var express = require("express");
   mongoose = require("mongoose"),
   ejsMate = require('ejs-mate'),
   session = require('express-session'),
+  MongoStore = require('connect-mongo'),
+
   flash = require("connect-flash"),
   methodOverride = require("method-override"),
   passport = require("passport"),
@@ -20,10 +22,10 @@ var express = require("express");
   userRoutes = require('./routes/users');
   User       = require('./models/user')
   const mongoSanitize = require('express-mongo-sanitize');
-const { contentSecurityPolicy } = require('helmet');
+  const dbUrl=process.env.DB_URL
+// 'mongodb://localhost:27017/yelp_camp_1'
 
-
-mongoose.connect('mongodb://localhost:27017/yelp_camp_1', {useNewUrlParser: true,useCreateIndex:true, useUnifiedTopology: true ,useFindAndModify: false});
+mongoose.connect(dbUrl, {useNewUrlParser: true,useCreateIndex:true, useUnifiedTopology: true ,useFindAndModify: false});
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => {
@@ -45,8 +47,15 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname,'public')))
 // remove or prohibit objects that begin wiht $ sign or contain . from req.body, req.qery,req.params
 app.use(mongoSanitize());
-
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  touchAfter: 24 * 60 * 60,
+  crypto: {
+      secret: 'thisshouldbeabettersecret!'
+  }
+});
 const sessionConfig = {
+  store,
   name:'session',  // session cookie name, default: connect.sid
   secret:'thisshouldbeabettersecret',
   resave:false,
